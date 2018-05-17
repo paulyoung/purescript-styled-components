@@ -9,7 +9,7 @@ install:
   - bower install
 script:
   - pulp test
-  - (cd example && pulp build)
+  - (cd example && bower install && pulp build)
 after_success:
 - >-
   test $TRAVIS_TAG &&
