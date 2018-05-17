@@ -1,0 +1,7 @@
+{
+  "name": "example",
+  "private": true,
+  "dependencies": {
+    "purescript-styled-components": "*"
+  }
+}
