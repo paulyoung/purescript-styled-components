@@ -8,7 +8,7 @@ import Example.Title (title_)
 import Example.Wrapper (wrapper_)
 import Halogen as H
 import Halogen.HTML as HH
-import Style.Property.Value (center, em)
+import Style.Declaration.Value (center, em)
 
 type State = Unit
 

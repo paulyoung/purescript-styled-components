@@ -6,7 +6,7 @@ import Color (Color)
 import Data.Array as Array
 import Data.Maybe (Maybe)
 import Halogen.HTML as HH
-import Style.Property (PaddingValue, backgroundColor, padding)
+import Style.Declaration (PaddingValue, backgroundColor, padding)
 import Styled.Components as Styled
 
 type State s =
