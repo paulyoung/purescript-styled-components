@@ -6,7 +6,7 @@ import Color (Color)
 import Data.Array as Array
 import Data.Maybe (Maybe)
 import Halogen.HTML as HH
-import Style.Property (FontSizeValue, TextAlignValue, color, fontSize, textAlign)
+import Style.Declaration (FontSizeValue, TextAlignValue, color, fontSize, textAlign)
 import Styled.Components as Styled
 
 type State s =
