@@ -8,8 +8,8 @@ install:
   - export PATH="$PATH:`yarn global bin`"
   - bower install
 script:
-  - pulp test --no-check-main
-  - (cd example && bower install && pulp build --no-check-main)
+  - pulp test
+  - (cd example && bower install && pulp build)
 after_success:
 - >-
   test $TRAVIS_TAG &&
