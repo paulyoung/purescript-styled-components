@@ -1,29 +1,62 @@
 module Styled.Components
-  ( element
+  ( css
+  , element
+  , id
   ) where
 
 import Prelude
 
 import Data.Array as Array
+import Data.Int (hexadecimal, toStringAs)
+import Data.Newtype (unwrap)
+import Data.Traversable (sequence)
+import Effect.Class (liftEffect)
+import Effect.Random (randomInt)
+import Halogen as H
 import Halogen.HTML as HH
-import Halogen.HTML.Core as HC
 import Halogen.HTML.Properties as HP
 import Style.Declaration (Declaration)
-import Style.Render (inline)
+import Style.Ruleset (Ruleset(..))
+import Style.Ruleset as Ruleset
+import Style.Selector (Selector(..))
+import Styled.Components.Effect (CSS, StyledM, appendCSS, cssValues)
+import Styled.Components.Types (Element, ID(..))
 
 element
   :: forall s r p i
-   . (Array (HH.IProp r i) -> Array (HH.HTML p i) -> HH.HTML p i)
+   . Element r p i
   -> Array (s -> Array Declaration)
+  -> ID
   -> s
-  -> Array (HH.IProp r i)
-  -> Array (HH.HTML p i)
-  -> HH.HTML p i
-element el fns state props = el (props <> [ attr ])
-  where
+  -> StyledM (Element r p i)
+element el fns ident state = do
+  -- FIXME: purescript-murmur3 when compatible with 0.12
+  hashed <- unwrap <$> id
 
-  styles :: Array Declaration
-  styles = Array.foldl (\styleProps fn -> styleProps <> fn state) [] fns
+  let
+    decls :: Array Declaration
+    decls = Array.foldl (\styleProps fn -> styleProps <> fn state) [] fns
 
-  attr :: HH.IProp r i
-  attr = HP.attr (HC.AttrName "style") $ inline styles
+    className :: String
+    className = "_" <> hashed
+
+    prop :: HH.IProp (class :: String | r) i
+    prop = HP.class_ $ H.ClassName className
+
+    ruleset :: Ruleset
+    ruleset = Ruleset [ClassSelector className] decls
+
+  -- TODO: CSS statements
+  appendCSS ident [ruleset]
+  pure $ \props -> el $ props <> [prop]
+
+css :: forall p i. StyledM (HH.HTML p i)
+css = cssToHTML <$> cssValues
+
+cssToHTML :: forall p i. CSS -> HH.HTML p i
+cssToHTML = HH.style_ <<< map (HH.text <<< Ruleset.render)
+
+id :: StyledM ID
+id = do
+  bytes <- liftEffect $ sequence $ Array.replicate 16 $ randomInt 16 255
+  pure $ ID $ Array.intercalate "" $ toStringAs hexadecimal <$> bytes

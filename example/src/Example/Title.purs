@@ -7,21 +7,21 @@ import Data.Array as Array
 import Data.Maybe (Maybe)
 import Halogen.HTML as HH
 import Style.Declaration (FontSizeValue, TextAlignValue, color, fontSize, textAlign)
-import Styled.Components as Styled
+import Styled.Components (element) as Styled
+import Styled.Components.Effect (StyledM)
+import Styled.Components.Types (Element, Element_, ID) as Styled
 
-type State s =
-  ( color :: Maybe Color
+type State =
+  { color :: Maybe Color
   , fontSize :: Maybe FontSizeValue
   , textAlign :: Maybe TextAlignValue
-  | s
-  )
+  }
 
 title
-  :: forall s p i
-   . { | State s }
-  -> Array (HH.IProp _ i)
-  -> Array (HH.HTML p i)
-  -> HH.HTML p i
+  :: forall p i
+   . Styled.ID
+  -> State
+  -> StyledM (Styled.Element _ p i)
 title = Styled.element HH.h1
   [ \state -> Array.catMaybes
       [ color <$> state.color
@@ -30,5 +30,9 @@ title = Styled.element HH.h1
       ]
   ]
 
-title_ :: forall s p i. { | State s } -> Array (HH.HTML p i) -> HH.HTML p i
-title_ state = title state []
+title_
+  :: forall p i
+   . Styled.ID
+  -> State
+  -> StyledM (Styled.Element_ p i)
+title_ id state = title id state <*> pure []
