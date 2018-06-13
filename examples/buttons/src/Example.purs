@@ -54,14 +54,19 @@ example =
 
   render :: State -> StyledM (H.ParentHTML Query Button.Query ChildSlot StyledM)
   render state = do
+    let
+      button0 = HH.slot 0 button unit $ HE.input HandleButtonMessage
+      button1 = HH.slot 1 button unit $ HE.input HandleButtonMessage
+      button2 = HH.slot 2 button unit $ HE.input HandleButtonMessage
+
     css <- Styled.css
 
     pure $
       HH.div_
         [ css
-        , HH.slot 0 button unit $ HE.input HandleButtonMessage
-        , HH.slot 1 button unit $ HE.input HandleButtonMessage
-        , HH.slot 2 button unit $ HE.input HandleButtonMessage
+        , button0
+        , button1
+        , button2
         , HH.p_
             [ HH.text ("Buttons have been toggled " <> Int.toStringAs decimal state.toggleCount <> " time(s)") ]
         ]

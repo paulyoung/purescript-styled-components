@@ -7,21 +7,23 @@ module Styled.Components
 
 import Prelude
 
-import Control.Monad.State (class MonadState)
 import Data.Array as Array
+import Data.BigInt (BigInt)
+import Data.BigInt as BigInt
 import Data.Int (hexadecimal, toStringAs)
-import Data.Newtype (unwrap)
 import Data.Traversable (sequence)
 import Effect.Class (liftEffect)
 import Effect.Random (randomInt)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Murmur3 (hashString)
 import Style.Declaration (Declaration)
+import Style.Render (inline)
 import Style.Ruleset (Ruleset(..))
 import Style.Ruleset as Ruleset
 import Style.Selector (Selector(..))
-import Styled.Components.Effect (CSS, StyledM(..), appendCSS, cssValues)
+import Styled.Components.Effect (CSS, StyledM, appendCSS, cssValues)
 import Styled.Components.Types (Element, ID(..))
 
 element
@@ -32,15 +34,15 @@ element
   -> s
   -> StyledM (Element r p i)
 element el fns ident state = do
-  -- FIXME: purescript-murmur3 when compatible with 0.12
-  hashed <- unwrap <$> id
-
   let
     decls :: Array Declaration
     decls = Array.foldl (\styleProps fn -> styleProps <> fn state) [] fns
 
+    hashed :: BigInt
+    hashed = hashString (BigInt.fromInt 0) (inline decls)
+
     className :: String
-    className = "_" <> hashed
+    className = "_" <> BigInt.toBase 16 hashed
 
     prop :: HH.IProp (class :: String | r) i
     prop = HP.class_ $ H.ClassName className
