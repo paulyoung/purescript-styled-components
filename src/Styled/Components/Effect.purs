@@ -3,6 +3,7 @@ module Styled.Components.Effect where
 import Prelude
 
 import Control.Monad.Reader (ReaderT(..), runReaderT)
+import Control.Monad.State (class MonadState)
 import Data.Array as Array
 import Data.Map (Map)
 import Data.Map as Map
@@ -28,6 +29,7 @@ derive newtype instance applicativeStyledM :: Applicative StyledM
 derive newtype instance bindStyledM :: Bind StyledM
 derive newtype instance monadStyledM :: Monad StyledM
 derive newtype instance monadEffectStyledM :: MonadEffect StyledM
+-- derive newtype instance monadStateStyledM :: MonadState { html :: h | s} StyledM
 
 runStyledM :: StyledEnv -> StyledM ~> Aff
 runStyledM env (StyledM app) = runReaderT app env

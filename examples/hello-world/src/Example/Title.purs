@@ -35,4 +35,4 @@ title_
    . Styled.ID
   -> State
   -> StyledM (Styled.Element_ p i)
-title_ id state = title id state <*> pure []
+title_ id state = title id state <@> []

@@ -33,4 +33,4 @@ wrapper_
    . Styled.ID
   -> State
   -> StyledM (Styled.Element_ p i)
-wrapper_ id state = wrapper id state <*> pure []
+wrapper_ id state = wrapper id state <@> []

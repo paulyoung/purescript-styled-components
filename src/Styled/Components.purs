@@ -2,10 +2,12 @@ module Styled.Components
   ( css
   , element
   , id
+  , modify_
   ) where
 
 import Prelude
 
+import Control.Monad.State (class MonadState)
 import Data.Array as Array
 import Data.Int (hexadecimal, toStringAs)
 import Data.Newtype (unwrap)
@@ -19,7 +21,7 @@ import Style.Declaration (Declaration)
 import Style.Ruleset (Ruleset(..))
 import Style.Ruleset as Ruleset
 import Style.Selector (Selector(..))
-import Styled.Components.Effect (CSS, StyledM, appendCSS, cssValues)
+import Styled.Components.Effect (CSS, StyledM(..), appendCSS, cssValues)
 import Styled.Components.Types (Element, ID(..))
 
 element
@@ -60,3 +62,14 @@ id :: StyledM ID
 id = do
   bytes <- liftEffect $ sequence $ Array.replicate 16 $ randomInt 16 255
   pure $ ID $ Array.intercalate "" $ toStringAs hexadecimal <$> bytes
+
+modify_
+  :: forall s f g p o
+   . ({ html :: HH.HTML _ (f Unit) | s } -> StyledM (HH.HTML _ (f Unit)))
+  -> ({ html :: HH.HTML _ (f Unit) | s } -> { html :: HH.HTML _ (f Unit) | s })
+  -> (H.HalogenM { html :: HH.HTML _ (f Unit) | s } f g _ o StyledM) Unit
+modify_ render f = do
+  state <- H.get
+  let newState = f state
+  html <- H.lift $ render newState
+  H.modify_ $ const $ newState { html = html }

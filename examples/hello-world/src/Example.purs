@@ -26,8 +26,6 @@ type Input = Unit
 
 type Message = Void
 
-type Slot = Unit
-
 example :: H.Component HH.HTML Query Input Message StyledM
 example =
   H.lifecycleComponent
@@ -76,7 +74,7 @@ example =
       state <- H.get
       id <- H.lift $ Styled.id
       html <- H.lift $ render $ state { id = id }
-      _ <- H.modify _ { html = html, id = id }
+      H.modify_ _ { html = html, id = id }
       pure next
     Finalize next -> do
       id <- H.gets _.id
