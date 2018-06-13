@@ -40,7 +40,10 @@ data Query a
 
 type Input = Unit
 
-data Message = Toggled Boolean
+data Message
+  = Initialized
+  | Finalized
+  | Toggled Boolean
 
 button :: H.Component HH.HTML Query Input Message StyledM
 button =
@@ -77,10 +80,12 @@ button =
     Initialize next -> do
       id <- H.lift $ Styled.id
       Styled.modify_ render $ _ { id = id }
+      H.raise Initialized -- tedious to do manually, transparent HOC will help, should we pass CSS up here instead of appendCSS/StyledM?
       pure next
     Finalize next -> do
       id <- H.gets _.id
       H.lift $ deleteCSS id
+      H.raise Finalized -- should we just pass id here instead of deleteCSS?
       pure next
     Toggle next -> do
       state <- H.get

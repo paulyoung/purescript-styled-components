@@ -54,6 +54,7 @@ example =
 
   render :: State -> StyledM (H.ParentHTML Query Button.Query ChildSlot StyledM)
   render state = do
+    -- FIXME: styles not added to style tag until HandleButtonMessage
     let
       button0 = HH.slot 0 button unit $ HE.input HandleButtonMessage
       button1 = HH.slot 1 button unit $ HE.input HandleButtonMessage
@@ -80,6 +81,12 @@ example =
     Finalize next -> do
       id <- H.gets _.id
       H.lift $ deleteCSS id
+      pure next
+    HandleButtonMessage Button.Initialized next -> do
+      Styled.modify_ render identity
+      pure next
+    HandleButtonMessage Button.Finalized next -> do
+      Styled.modify_ render identity
       pure next
     HandleButtonMessage (Button.Toggled _) next -> do
       Styled.modify_ render $ \state ->
