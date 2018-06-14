@@ -2,14 +2,16 @@ module Example.Button where
 
 import Prelude
 
-import Color (Color)
+import Color (Color, rgb, white)
+import Color.Scheme.HTML (blue)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Style.Declaration (FontSizeValue, TextAlignValue, color, fontSize, textAlign)
+import Style.Declaration (FontSizeValue, TextAlignValue, backgroundColor, borderRadius, color, fontSize, padding, textAlign)
+import Style.Declaration.Value (px)
 import Styled.Components (element, id, modify_) as Styled
 import Styled.Components.Effect (StyledM, deleteCSS)
 import Styled.Components.Types (Element, Element_, ID(..)) as Styled
@@ -21,7 +23,11 @@ buttonEl
   -> StyledM (Styled.Element _ p i)
 buttonEl id = Styled.element HH.button -- TODO: hover
   [ \_ ->
-      [
+      [ backgroundColor $ rgb 0 103 238
+      , borderRadius $ 4.0 # px
+      , color white
+      , fontSize $ 14.0 # px
+      , padding $ 3.0 # px
       ]
   ]
   id
