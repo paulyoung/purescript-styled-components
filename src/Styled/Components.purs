@@ -37,9 +37,7 @@ element
   -> StyledM (Element r p i)
 element el constructors ident state = do
   let
-    foo :: Array Ruleset -> Constructors s -> Array Ruleset
-    -- { prop :: HH.IProp, ruleset :: Ruleset }
-    foo rulesets construct =
+    step { classNames, rulesets } construct =
       let
         decls :: Array Declaration
         decls = construct.declarations state
@@ -53,25 +51,31 @@ element el constructors ident state = do
         selector :: Selector
         selector = construct.selector $ ClassSelector className
       in
-        rulesets <> [ Ruleset [ selector ] decls ]
+        { classNames: classNames <> [ H.ClassName className ]
+        , rulesets: rulesets <> [ Ruleset [ selector ] decls ]
+        }
 
-    rulesets :: Array Ruleset
-    -- { props :: Array HH.IProp, rulesets :: Array Ruleset }
-    rulesets = Array.foldl foo [] constructors
-
-    newProps = [] -- rulesets <#> \(Ruleset selectors _) ->
-    -- prop :: HH.IProp (class :: String | r) i
-    -- prop = HP.class_ $ H.ClassName className
+    new ::
+      { classNames :: Array H.ClassName
+      , rulesets :: Array Ruleset
+      }
+    new = Array.foldl step { classNames: [], rulesets: [] } constructors
 
   -- TODO: CSS statements
-  appendCSS ident rulesets
-  pure $ \props -> el $ props <> newProps
+  appendCSS ident new.rulesets
+  pure $ \props -> el $ props <> [ HP.classes $ Array.nub new.classNames ]
 
 css :: forall p i. StyledM (HH.HTML p i)
 css = cssToHTML <$> cssValues
 
 cssToHTML :: forall p i. CSS -> HH.HTML p i
-cssToHTML = HH.style_ <<< map (HH.text <<< Ruleset.render)
+-- cssToHTML = HH.style_ <<< map (HH.text <<< Ruleset.render)
+cssToHTML =
+  HH.style_
+    <<< Array.singleton
+    <<< HH.text
+    <<< Array.intercalate "\n"
+    <<< map Ruleset.render
 
 id :: StyledM ID
 id = do
