@@ -8,6 +8,7 @@ import Data.Maybe (Maybe)
 import Halogen.HTML as HH
 import Style.Declaration (FontSizeValue, TextAlignValue, color, fontSize, textAlign)
 import Styled.Components (element) as Styled
+import Styled.Components.Constructors (css)
 import Styled.Components.Effect (StyledM)
 import Styled.Components.Types (Element, Element_, ID) as Styled
 
@@ -23,7 +24,7 @@ title
   -> State
   -> StyledM (Styled.Element _ p i)
 title = Styled.element HH.h1
-  [ \state -> Array.catMaybes
+  [ css \state -> Array.catMaybes
       [ color <$> state.color
       , fontSize <$> state.fontSize
       , textAlign <$> state.textAlign

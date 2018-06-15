@@ -6,13 +6,16 @@ import Color (Color, rgb, white)
 import Color.Scheme.HTML (blue)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Style.Declaration (FontSizeValue, TextAlignValue, backgroundColor, borderRadius, color, fontSize, padding, textAlign)
+import Style.Declaration as CSS
 import Style.Declaration.Value (px)
+import Style.Selector (PseudoClass(..), Selector(..))
 import Styled.Components (element, id, modify_) as Styled
+import Styled.Components.Constructors (active, css, disabled, focus, hover)
 import Styled.Components.Effect (StyledM, deleteCSS)
 import Styled.Components.Types (Element, Element_, ID(..)) as Styled
 
@@ -21,13 +24,31 @@ buttonEl
   :: forall p i
    . Styled.ID
   -> StyledM (Styled.Element _ p i)
-buttonEl id = Styled.element HH.button -- TODO: hover
-  [ \_ ->
-      [ backgroundColor $ rgb 0 103 238
-      , borderRadius $ 4.0 # px
-      , color white
-      , fontSize $ 14.0 # px
-      , padding $ 3.0 # px
+buttonEl id = Styled.element HH.button
+  -- TODO: hover
+  -- TODO: provide ability to append to the list when using the instance, e.g. first button has no left margin
+  -- [ \_ ->
+  [ css \_ ->
+      [ CSS.backgroundColor $ rgb 0 103 238
+      , CSS.borderRadius $ 4.0 # px
+      , CSS.color white
+      , CSS.fontSize $ 14.0 # px
+      , CSS.paddingTop $ 8.0 # px
+      , CSS.paddingRight $ 16.0 # px
+      , CSS.paddingBottom $ 8.0 # px
+      , CSS.paddingLeft $ 16.0 # px
+      ]
+  , active \_ ->
+      [
+      ]
+  , disabled \_ ->
+      [
+      ]
+  , focus \_ ->
+      [
+      ]
+  , hover \_ ->
+      [ CSS.backgroundColor $ rgb 0 238 103 -- FIXME
       ]
   ]
   id

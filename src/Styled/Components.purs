@@ -12,47 +12,60 @@ import Data.BigInt (BigInt)
 import Data.BigInt as BigInt
 import Data.Int (hexadecimal, toStringAs)
 import Data.Traversable (sequence)
+import Data.Tuple (Tuple(..))
 import Effect.Class (liftEffect)
 import Effect.Random (randomInt)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Murmur3 (hashString)
-import Style.Declaration (Declaration)
+import Style.Declaration (Declaration(..))
 import Style.Render (inline)
 import Style.Ruleset (Ruleset(..))
 import Style.Ruleset as Ruleset
 import Style.Selector (Selector(..))
+import Styled.Components.Constructors (Constructors)
 import Styled.Components.Effect (CSS, StyledM, appendCSS, cssValues)
 import Styled.Components.Types (Element, ID(..))
 
 element
   :: forall s r p i
    . Element r p i
-  -> Array (s -> Array Declaration)
+  -> Array (Constructors s)
   -> ID
   -> s
   -> StyledM (Element r p i)
-element el fns ident state = do
+element el constructors ident state = do
   let
-    decls :: Array Declaration
-    decls = Array.foldl (\styleProps fn -> styleProps <> fn state) [] fns
+    foo :: Array Ruleset -> Constructors s -> Array Ruleset
+    -- { prop :: HH.IProp, ruleset :: Ruleset }
+    foo rulesets construct =
+      let
+        decls :: Array Declaration
+        decls = construct.declarations state
 
-    hashed :: BigInt
-    hashed = hashString (BigInt.fromInt 0) (inline decls)
+        hashed :: BigInt
+        hashed = hashString (BigInt.fromInt 0) (inline decls)
 
-    className :: String
-    className = "_" <> BigInt.toBase 16 hashed
+        className :: String
+        className = "_" <> BigInt.toBase 16 hashed
 
-    prop :: HH.IProp (class :: String | r) i
-    prop = HP.class_ $ H.ClassName className
+        selector :: Selector
+        selector = construct.selector $ ClassSelector className
+      in
+        rulesets <> [ Ruleset [ selector ] decls ]
 
-    ruleset :: Ruleset
-    ruleset = Ruleset [ClassSelector className] decls
+    rulesets :: Array Ruleset
+    -- { props :: Array HH.IProp, rulesets :: Array Ruleset }
+    rulesets = Array.foldl foo [] constructors
+
+    newProps = [] -- rulesets <#> \(Ruleset selectors _) ->
+    -- prop :: HH.IProp (class :: String | r) i
+    -- prop = HP.class_ $ H.ClassName className
 
   -- TODO: CSS statements
-  appendCSS ident [ruleset]
-  pure $ \props -> el $ props <> [prop]
+  appendCSS ident rulesets
+  pure $ \props -> el $ props <> newProps
 
 css :: forall p i. StyledM (HH.HTML p i)
 css = cssToHTML <$> cssValues
