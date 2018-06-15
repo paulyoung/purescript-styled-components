@@ -74,7 +74,8 @@ cssToHTML =
   HH.style_
     <<< Array.singleton
     <<< HH.text
-    <<< Array.intercalate "\n"
+    <<< Array.intercalate "\n\n"
+    <<< Array.filter (_ /= "")
     <<< map Ruleset.render
 
 id :: StyledM ID
