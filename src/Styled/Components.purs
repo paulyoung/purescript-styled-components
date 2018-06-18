@@ -43,34 +43,27 @@ element
   -> StyledM (Element r p i)
 element el constructors ident state = do
   let
-    step { classNames, rulesets } construct =
+    step st construct = fromMaybe st do
+      decls <- NEA.fromArray $ construct.declarations state
+
       let
-        decls :: Maybe (NonEmptyArray Declaration)
-        decls = NEA.fromArray $ construct.declarations state
+        inlined :: String
+        inlined = inline decls
 
-        inlined :: Maybe String
-        inlined = inline <$> decls
+        hashed :: BigInt
+        hashed = hashString zero inlined
 
-        hashed :: Maybe BigInt
-        hashed = hashString zero <$> inlined
+        className :: String
+        className = "_" <> BigInt.toBase 16 hashed
 
-        className :: Maybe String
-        className = append "_" <<< BigInt.toBase 16 <$> hashed
+        selector :: Selector
+        selector = construct.selector $ ClassSelector className
 
-        selector :: Maybe Selector
-        selector = construct.selector <<< ClassSelector <$> className
+      selectors <- NEA.fromArray [ selector ]
 
-        selectors :: Maybe (NonEmptyArray Selector)
-        selectors = NEA.fromArray =<< Array.singleton <$> selector
-
-        newClassNames :: Maybe (Array H.ClassName)
-        newClassNames = Array.singleton <<< H.ClassName <$> className
-
-        newRulesets :: Maybe (Array Ruleset)
-        newRulesets = map Array.singleton $ Ruleset <$> selectors <*> decls
-      in
-        { classNames: maybe classNames (classNames <> _) newClassNames
-        , rulesets: maybe rulesets (rulesets <> _) newRulesets
+      pure
+        { classNames: st.classNames <> [ H.ClassName className ]
+        , rulesets: st.rulesets <> [ Ruleset selectors decls ]
         }
 
     new ::
