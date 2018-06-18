@@ -11,8 +11,10 @@ import Example.Button as Button
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Style.Declaration.Value (center, em)
+import Style.Declaration as CSS
+import Style.Declaration.Value (center, em, px)
 import Styled.Components (css, id, modify_) as Styled
+import Styled.Components.Constructors (css)
 import Styled.Components.Effect (StyledM, deleteCSS)
 import Styled.Components.Types (ID(..)) as Styled
 
@@ -54,17 +56,22 @@ example =
 
   render :: State -> StyledM (H.ParentHTML Query Button.Query ChildSlot StyledM)
   render state = do
-    -- FIXME: styles not added to style tag until HandleButtonMessage
     let
-      button0 = HH.slot 0 button unit $ HE.input HandleButtonMessage
-      button1 = HH.slot 1 button unit $ HE.input HandleButtonMessage
-      button2 = HH.slot 2 button unit $ HE.input HandleButtonMessage
+      buttonCSS =
+        [ css \_ ->
+            [ CSS.marginLeft $ 8.0 # px
+            ]
+        ]
 
-    css <- Styled.css
+      button0 = HH.slot 0 button { css: [] } $ HE.input HandleButtonMessage
+      button1 = HH.slot 1 button { css: buttonCSS } $ HE.input HandleButtonMessage
+      button2 = HH.slot 2 button { css: buttonCSS } $ HE.input HandleButtonMessage
+
+    styleTag <- Styled.css
 
     pure $
       HH.div_
-        [ css
+        [ styleTag
         , button0
         , button1
         , button2

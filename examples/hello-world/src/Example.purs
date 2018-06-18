@@ -57,11 +57,11 @@ example =
       , padding: Just $ 4.0 # em
       }
 
-    css <- Styled.css
+    styleTag <- Styled.css
 
     pure $
       HH.div_
-        [ css
+        [ styleTag
         , wrapper'
             [ title'
                 [ HH.text "Hello World, this is my first styled component!" ]

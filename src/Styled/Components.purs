@@ -3,6 +3,7 @@ module Styled.Components
   , element
   , id
   , modify_
+  , modifyOver_
   ) where
 
 import Prelude
@@ -11,6 +12,7 @@ import Data.Array as Array
 import Data.BigInt (BigInt)
 import Data.BigInt as BigInt
 import Data.Int (hexadecimal, toStringAs)
+import Data.Newtype (class Newtype, under, unwrap, wrap)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 import Effect.Class (liftEffect)
@@ -18,6 +20,7 @@ import Effect.Random (randomInt)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.Query.HalogenM as HM
 import Murmur3 (hashString)
 import Style.Declaration (Declaration(..))
 import Style.Render (inline)
@@ -93,3 +96,14 @@ modify_ render f = do
   let newState = f state
   html <- H.lift $ render newState
   H.modify_ $ const $ newState { html = html }
+
+modifyOver_
+  :: forall state s f g p o
+   . Newtype state { html :: HH.HTML _ (f Unit) | s }
+  => ({ html :: HH.HTML _ (f Unit) | s } -> state)
+  -> (state -> StyledM (HH.HTML _ (f Unit)))
+  -> ({ html :: HH.HTML _ (f Unit) | s } -> { html :: HH.HTML _ (f Unit) | s })
+  -> H.HalogenM state f g _ o StyledM Unit
+modifyOver_ t render' =
+  HM.imapState wrap unwrap
+    <<< modify_ (wrap <<< under t render')
