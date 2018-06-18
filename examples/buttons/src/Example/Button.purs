@@ -15,7 +15,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.HalogenM as HM
 import Style.Declaration as CSS
-import Style.Declaration.Value (px)
+import Style.Declaration.Value (bold, px)
 import Style.Selector (PseudoClass(..), Selector(..))
 import Styled.Components (element, id, modify_, modifyOver_) as Styled
 import Styled.Components.Constructors (Constructors, active, css, disabled, focus, hover)
@@ -40,6 +40,7 @@ buttonEl state@(State s) = el s.id state
         , CSS.borderRadius $ 4.0 # px
         , CSS.color white
         , CSS.fontSize $ 14.0 # px
+        , CSS.fontWeight bold
         , CSS.paddingTop $ 8.0 # px
         , CSS.paddingRight $ 16.0 # px
         , CSS.paddingBottom $ 8.0 # px

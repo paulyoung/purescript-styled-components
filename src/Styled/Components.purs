@@ -9,9 +9,12 @@ module Styled.Components
 import Prelude
 
 import Data.Array as Array
+import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Array.NonEmpty as NEA
 import Data.BigInt (BigInt)
 import Data.BigInt as BigInt
 import Data.Int (hexadecimal, toStringAs)
+import Data.Maybe (Maybe, fromMaybe, maybe)
 import Data.Newtype (class Newtype, under, unwrap, wrap)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
@@ -42,20 +45,32 @@ element el constructors ident state = do
   let
     step { classNames, rulesets } construct =
       let
-        decls :: Array Declaration
-        decls = construct.declarations state
+        decls :: Maybe (NonEmptyArray Declaration)
+        decls = NEA.fromArray $ construct.declarations state
 
-        hashed :: BigInt
-        hashed = hashString (BigInt.fromInt 0) (inline decls)
+        inlined :: Maybe String
+        inlined = inline <$> decls
 
-        className :: String
-        className = "_" <> BigInt.toBase 16 hashed
+        hashed :: Maybe BigInt
+        hashed = hashString zero <$> inlined
 
-        selector :: Selector
-        selector = construct.selector $ ClassSelector className
+        className :: Maybe String
+        className = append "_" <<< BigInt.toBase 16 <$> hashed
+
+        selector :: Maybe Selector
+        selector = construct.selector <<< ClassSelector <$> className
+
+        selectors :: Maybe (NonEmptyArray Selector)
+        selectors = NEA.fromArray =<< Array.singleton <$> selector
+
+        newClassNames :: Maybe (Array H.ClassName)
+        newClassNames = Array.singleton <<< H.ClassName <$> className
+
+        newRulesets :: Maybe (Array Ruleset)
+        newRulesets = map Array.singleton $ Ruleset <$> selectors <*> decls
       in
-        { classNames: classNames <> [ H.ClassName className ]
-        , rulesets: rulesets <> [ Ruleset [ selector ] decls ]
+        { classNames: maybe classNames (classNames <> _) newClassNames
+        , rulesets: maybe rulesets (rulesets <> _) newRulesets
         }
 
     new ::
@@ -64,7 +79,7 @@ element el constructors ident state = do
       }
     new = Array.foldl step { classNames: [], rulesets: [] } constructors
 
-  -- TODO: CSS statements
+  -- TODO: CSS statement
   appendCSS ident new.rulesets
   pure $ \props -> el $ props <> [ HP.classes $ Array.nub new.classNames ]
 
@@ -72,14 +87,7 @@ css :: forall p i. StyledM (HH.HTML p i)
 css = cssToHTML <$> cssValues
 
 cssToHTML :: forall p i. CSS -> HH.HTML p i
--- cssToHTML = HH.style_ <<< map (HH.text <<< Ruleset.render)
-cssToHTML =
-  HH.style_
-    <<< Array.singleton
-    <<< HH.text
-    <<< Array.intercalate "\n\n"
-    <<< Array.filter (_ /= "")
-    <<< map Ruleset.render
+cssToHTML = HH.style_ <<< map (HH.text <<< Ruleset.render)
 
 id :: StyledM ID
 id = do
