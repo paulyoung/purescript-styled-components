@@ -4,7 +4,7 @@ import Prelude
 
 import Color (Color)
 import Data.Array as Array
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe, maybe)
 import Halogen.HTML as HH
 import Style.Declaration (PaddingValue, backgroundColor, padding)
 import Styled.Components (element) as Styled
@@ -23,10 +23,11 @@ wrapper
   -> State
   -> StyledM (Styled.Element _ p i)
 wrapper = Styled.element HH.section
-  [ css \state -> Array.catMaybes
-      [ backgroundColor <$> state.backgroundColor
-      , padding <$> state.padding
-      ]
+  [ css \state ->
+      Array.catMaybes
+        [ backgroundColor <$> state.backgroundColor
+        ]
+        <> maybe mempty (\p -> padding p p p p) state.padding
   ]
 
 wrapper_

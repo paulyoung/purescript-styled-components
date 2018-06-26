@@ -45,13 +45,10 @@ buttonEl state@(State s) = el s.id state
         ]
         <> CSS.borderRadius (4.0 # px) (4.0 # px) (4.0 # px) (4.0 # px)
         <> CSS.padding (8.0 # px) (16.0 # px) (8.0 # px) (16.0 # px)
-    , active \_ ->
+    , hover \_ ->
         [ CSS.boxShadow
-            [ boxShadow_ true zero zero (8.0 # px) zero (rgba 0 0 0 0.25)
+            [ boxShadow_ true zero zero zero (999.0 # px) (rgba 0 0 0 0.125)
             ]
-        ]
-    , disabled \_ ->
-        [
         ]
     , focus \_ ->
         [ CSS.boxShadow
@@ -59,10 +56,13 @@ buttonEl state@(State s) = el s.id state
             ]
         , CSS.outlineStyle none
         ]
-    , hover \_ ->
+    , active \_ ->
         [ CSS.boxShadow
-            [ boxShadow_ true zero zero zero (999.0 # px) (rgba 0 0 0 0.125)
+            [ boxShadow_ true zero zero (8.0 # px) zero (rgba 0 0 0 0.25)
             ]
+        ]
+    , disabled \_ ->
+        [
         ]
     ]
     <> s.css
