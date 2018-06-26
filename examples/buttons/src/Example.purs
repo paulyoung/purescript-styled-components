@@ -2,7 +2,6 @@ module Example where
 
 import Prelude
 
-import Color.Scheme.X11 (palevioletred, papayawhip)
 import Data.Int (decimal)
 import Data.Int as Int
 import Data.Maybe (Maybe(..))
@@ -12,7 +11,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Style.Declaration as CSS
-import Style.Declaration.Value (center, em, px)
+import Style.Declaration.Value (px)
 import Styled.Components (css, id, modify_) as Styled
 import Styled.Components.Constructors (css)
 import Styled.Components.Effect (StyledM, deleteCSS)
@@ -82,8 +81,8 @@ example =
   eval :: Query ~> H.ParentDSL State Query Button.Query ChildSlot Message StyledM
   eval = case _ of
     Initialize next -> do
-      id <- H.lift $ Styled.id
-      Styled.modify_ render $ _ { id = id }
+      id <- H.lift Styled.id
+      Styled.modify_ render _ { id = id }
       pure next
     Finalize next -> do
       id <- H.gets _.id
@@ -96,6 +95,6 @@ example =
       Styled.modify_ render identity
       pure next
     HandleButtonMessage (Button.Toggled _) next -> do
-      Styled.modify_ render $ \state ->
+      Styled.modify_ render \state ->
         state { toggleCount = state.toggleCount + 1 }
       pure next

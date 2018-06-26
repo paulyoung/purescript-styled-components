@@ -9,7 +9,7 @@ import Example.Wrapper (wrapper_)
 import Halogen as H
 import Halogen.HTML as HH
 import Style.Declaration.Value (center, em)
-import Styled.Components (css, id) as Styled
+import Styled.Components (css, id, modify_) as Styled
 import Styled.Components.Effect (StyledM, deleteCSS)
 import Styled.Components.Types (ID(..)) as Styled
 
@@ -71,10 +71,8 @@ example =
   eval :: Query ~> H.ComponentDSL State Query Message StyledM
   eval = case _ of
     Initialize next -> do
-      state <- H.get
-      id <- H.lift $ Styled.id
-      html <- H.lift $ render $ state { id = id }
-      H.modify_ _ { html = html, id = id }
+      id <- H.lift Styled.id
+      Styled.modify_ render _ { id = id }
       pure next
     Finalize next -> do
       id <- H.gets _.id
