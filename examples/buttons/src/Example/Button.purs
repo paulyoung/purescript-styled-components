@@ -1,8 +1,8 @@
 module Example.Button where
 
-import Prelude
+import Prelude hiding (zero)
 
-import Color (Color, rgb, white)
+import Color (Color, rgb, rgba, white)
 import Color.Scheme.HTML (blue)
 import Data.Array as Array
 import Data.Function (on)
@@ -15,7 +15,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.HalogenM as HM
 import Style.Declaration as CSS
-import Style.Declaration.Value (bold, px)
+import Style.Declaration.Value (bold, boxShadow_, center, none, px, zero)
 import Style.Selector (PseudoClass(..), Selector(..))
 import Styled.Components (element, id, modify_, modifyOver_) as Styled
 import Styled.Components.Constructors (Constructors, active, css, disabled, focus, hover)
@@ -37,28 +37,35 @@ buttonEl state@(State s) = el s.id state
   el = Styled.element HH.button $
     [ css \_ ->
         [ CSS.backgroundColor $ rgb 0 103 238
-        , CSS.borderRadius $ 4.0 # px
         , CSS.color white
         , CSS.fontSize $ 14.0 # px
         , CSS.fontWeight bold
-        , CSS.paddingTop $ 8.0 # px
-        , CSS.paddingRight $ 16.0 # px
-        , CSS.paddingBottom $ 8.0 # px
-        , CSS.paddingLeft $ 16.0 # px
+        -- , CSS.marginLeft $ 16.0 # px -- FIXME sometimes s.css comes before
+        , CSS.textAlign center
         ]
+        <> CSS.borderRadius (4.0 # px) (4.0 # px) (4.0 # px) (4.0 # px)
+        <> CSS.padding (8.0 # px) (16.0 # px) (8.0 # px) (16.0 # px)
     , active \_ ->
-        [
+        [ CSS.boxShadow
+            [ boxShadow_ true zero zero (8.0 # px) zero (rgba 0 0 0 0.25)
+            ]
         ]
     , disabled \_ ->
         [
         ]
     , focus \_ ->
-        [
+        [ CSS.boxShadow
+            [ boxShadow_ false zero zero zero (2.0 # px) (rgb 0 103 238)
+            ]
+        , CSS.outlineStyle none
         ]
     , hover \_ ->
-        [ CSS.backgroundColor $ rgb 0 238 103 -- FIXME
+        [ CSS.boxShadow
+            [ boxShadow_ true zero zero zero (999.0 # px) (rgba 0 0 0 0.125)
+            ]
         ]
-    ] <> s.css
+    ]
+    <> s.css
 
 type StateFields =
   { css :: Array (Constructors State)
