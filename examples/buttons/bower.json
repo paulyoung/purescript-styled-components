@@ -2,6 +2,6 @@
   "name": "example",
   "private": true,
   "dependencies": {
-    "purescript-styled-components": "1817534ba145979f7b9589c8fb578071e5b776fb"
+    "purescript-styled-components": "83d0e4f34c33375ebb78c1e0d32e34e734a7e1ff"
   }
 }
