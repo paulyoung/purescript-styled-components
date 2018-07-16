@@ -28,7 +28,6 @@ derive newtype instance applicativeStyledM :: Applicative StyledM
 derive newtype instance bindStyledM :: Bind StyledM
 derive newtype instance monadStyledM :: Monad StyledM
 derive newtype instance monadEffectStyledM :: MonadEffect StyledM
--- derive newtype instance monadStateStyledM :: MonadState { html :: h | s} StyledM
 
 runStyledM :: StyledEnv -> StyledM ~> Aff
 runStyledM env (StyledM app) = runReaderT app env

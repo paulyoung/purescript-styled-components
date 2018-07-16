@@ -26,7 +26,7 @@
     "purescript-prelude": "^4.0.0",
     "purescript-random": "^4.0.0",
     "purescript-refs": "^4.1.0",
-    "purescript-style": "^0.15.0"
+    "purescript-style": "^0.16.0"
     ,
     "purescript-transformers": "^4.1.0"
   },

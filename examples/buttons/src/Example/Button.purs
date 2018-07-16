@@ -2,49 +2,45 @@ module Example.Button where
 
 import Prelude hiding (zero)
 
-import Color (Color, rgb, rgba, white)
-import Color.Scheme.HTML (blue)
-import Data.Array as Array
-import Data.Function (on)
+import Color (rgb, rgba, white)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, over, over2, overF, overF2, under, unwrap, wrap)
-import Data.Tuple (Tuple(..), uncurry)
+import Data.Newtype (class Newtype, unwrap)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Halogen.Query.HalogenM as HM
 import Style.Declaration as CSS
-import Style.Declaration.Value (bold, boxShadow_, center, none, px, zero)
-import Style.Selector (PseudoClass(..), Selector(..))
-import Styled.Components (element, id, modify_, modifyOver_) as Styled
+import Style.Declaration.Value (bold, boxShadow_, center, none, px, transparent, zero)
+import Styled.Components (element, id, modifyOver_) as Styled
 import Styled.Components.Constructors (Constructors, active, css, disabled, focus, hover)
 import Styled.Components.Effect (StyledM, deleteCSS)
-import Styled.Components.Types (Element, Element_, ID(..)) as Styled
+import Styled.Components.Types (Element, ID(..)) as Styled
 
--- FIXME: button styling
 buttonEl
   :: forall p i
    . State
   -> StyledM (Styled.Element _ p i)
 buttonEl state@(State s) = el s.id state
-
   where
-
-  -- el
-  --   :: Styled.ID
-  --   -> StyledM (Styled.Element _ p i)
+  el
+    :: Styled.ID
+    -> State
+    -> StyledM (Styled.Element _ p i)
   el = Styled.element HH.button $
     [ css \_ ->
         [ CSS.backgroundColor $ rgb 0 103 238
+        , CSS.border' zero none transparent
+        , CSS.borderRadius (4.0 # px) (4.0 # px) (4.0 # px) (4.0 # px)
         , CSS.color white
         , CSS.fontSize $ 14.0 # px
         , CSS.fontWeight bold
-        -- , CSS.marginLeft $ 16.0 # px -- FIXME sometimes s.css comes before
+        , CSS.padding (8.0 # px) (16.0 # px) (8.0 # px) (16.0 # px)
         , CSS.textAlign center
+        -- FIXME: sometimes values from `s.css` appear first instead of last.
+        -- This demonstrates the issue because the `Example` module provides
+        -- `marginLeft` via `s.css`.
+        -- , CSS.marginLeft $ 16.0 # px
         ]
-        <> CSS.borderRadius (4.0 # px) (4.0 # px) (4.0 # px) (4.0 # px)
-        <> CSS.padding (8.0 # px) (16.0 # px) (8.0 # px) (16.0 # px)
     , hover \_ ->
         [ CSS.boxShadow
             [ boxShadow_ true zero zero zero (999.0 # px) (rgba 0 0 0 0.125)
@@ -54,7 +50,7 @@ buttonEl state@(State s) = el s.id state
         [ CSS.boxShadow
             [ boxShadow_ false zero zero zero (2.0 # px) (rgb 0 103 238)
             ]
-        , CSS.outlineStyle none
+        , CSS.outline' zero none transparent
         ]
     , active \_ ->
         [ CSS.boxShadow
@@ -125,17 +121,20 @@ button =
         ]
         [ HH.text label ]
 
+  -- TODO: Initalize/Finalize is tedious to do manually.
+  -- Transparent HOCs introduced in https://github.com/slamdata/purescript-halogen/issues/526
+  -- will help.
   eval :: Query ~> H.ComponentDSL State Query Message StyledM
   eval = case _ of
     Initialize next -> do
       id <- H.lift $ Styled.id
       Styled.modifyOver_ State render _ { id = id }
-      H.raise Initialized -- tedious to do manually, transparent HOC will help, should we pass CSS up here instead of appendCSS/StyledM?
+      H.raise Initialized -- With HOC, should we pass CSS up here instead of appendCSS/StyledM?
       pure next
     Finalize next -> do
       id <- H.gets $ _.id <<< unwrap
       H.lift $ deleteCSS id
-      H.raise Finalized -- should we just pass id here instead of deleteCSS?
+      H.raise Finalized -- With HOC, should we pass id here instead of deleteCSS?
       pure next
     Toggle next -> do
       (State state) <- H.get
